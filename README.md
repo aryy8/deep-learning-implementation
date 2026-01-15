@@ -31,92 +31,118 @@ This notebook builds a 2-layer neural network step-by-step:
 
 A single neuron computes a weighted sum of inputs plus a bias:
 
-\[
-z = \sum_{i=1}^{n} w_i x_i + b = \mathbf{w}^\top \mathbf{x} + b
-\]
+$$
+\begin{align*}
+z &= \sum_{i=1}^{n} w_i x_i + b = \mathbf{w}^\top \mathbf{x} + b
+\end{align*}
+$$
 
 Where:
-- \(\mathbf{x} \in \mathbb{R}^n\) — input vector
-- \(\mathbf{w} \in \mathbb{R}^n\) — weight vector
-- \(b \in \mathbb{R}\) — bias term
+- $\mathbf{x} \in \mathbb{R}^n$ — input vector
+- $\mathbf{w} \in \mathbb{R}^n$ — weight vector
+- $b \in \mathbb{R}$ — bias term
 
 ### Dense Layer
 
-For a batch of \(m\) samples with \(n\) inputs and \(k\) neurons:
+For a batch of $m$ samples with $n$ inputs and $k$ neurons:
 
-\[
-\mathbf{Z} = \mathbf{X}\mathbf{W} + \mathbf{b}
-\]
+$$
+\begin{align*}
+\mathbf{Z} &= \mathbf{X}\mathbf{W} + \mathbf{b}
+\end{align*}
+$$
 
 Where:
-- \(\mathbf{X} \in \mathbb{R}^{m \times n}\) — input matrix
-- \(\mathbf{W} \in \mathbb{R}^{n \times k}\) — weight matrix
-- \(\mathbf{b} \in \mathbb{R}^{1 \times k}\) — bias vector (broadcast)
-- \(\mathbf{Z} \in \mathbb{R}^{m \times k}\) — output (pre-activation)
+- $\mathbf{X} \in \mathbb{R}^{m \times n}$ — input matrix
+- $\mathbf{W} \in \mathbb{R}^{n \times k}$ — weight matrix
+- $\mathbf{b} \in \mathbb{R}^{1 \times k}$ — bias vector (broadcast)
+- $\mathbf{Z} \in \mathbb{R}^{m \times k}$ — output (pre-activation)
 
 ### Activation Functions
 
 **ReLU (Rectified Linear Unit):**
 
-\[
-\text{ReLU}(z) = \max(0, z)
-\]
+$$
+\begin{align*}
+\text{ReLU}(z) &= \max(0, z)
+\end{align*}
+$$
 
-\[
-\frac{\partial \text{ReLU}}{\partial z} = \begin{cases} 1 & z > 0 \\ 0 & z \leq 0 \end{cases}
-\]
+$$
+\begin{align*}
+\frac{\partial \text{ReLU}}{\partial z} &= \begin{cases} 1 & z > 0 \\ 0 & z \leq 0 \end{cases}
+\end{align*}
+$$
 
 **Softmax (for classification):**
 
-\[
-\text{softmax}(z_i) = \frac{e^{z_i}}{\sum_{j=1}^{K} e^{z_j}}
-\]
+$$
+\begin{align*}
+\text{softmax}(z_i) &= \frac{e^{z_i}}{\sum_{j=1}^{K} e^{z_j}}
+\end{align*}
+$$
 
 ### Loss Functions
 
 **Mean Squared Error (MSE):**
 
-\[
-\mathcal{L}_{\text{MSE}} = \frac{1}{m} \sum_{i=1}^{m} (\hat{y}_i - y_i)^2
-\]
+$$
+\begin{align*}
+\mathcal{L}_{\text{MSE}} &= \frac{1}{m} \sum_{i=1}^{m} (\hat{y}_i - y_i)^2
+\end{align*}
+$$
 
-\[
-\frac{\partial \mathcal{L}}{\partial \hat{y}} = \frac{2}{m}(\hat{y} - y)
-\]
+$$
+\begin{align*}
+\frac{\partial \mathcal{L}}{\partial \hat{y}} &= \frac{2}{m}(\hat{y} - y)
+\end{align*}
+$$
 
 **Cross-Entropy Loss:**
 
-\[
-\mathcal{L}_{\text{CE}} = -\frac{1}{m} \sum_{i=1}^{m} \sum_{k=1}^{K} y_{ik} \log(\hat{y}_{ik})
-\]
+$$
+\begin{align*}
+\mathcal{L}_{\text{CE}} &= -\frac{1}{m} \sum_{i=1}^{m} \sum_{k=1}^{K} y_{ik} \log(\hat{y}_{ik})
+\end{align*}
+$$
 
 **Softmax + Cross-Entropy Gradient (combined):**
 
-\[
-\frac{\partial \mathcal{L}}{\partial \mathbf{Z}} = \frac{1}{m}(\hat{\mathbf{Y}} - \mathbf{Y})
-\]
+$$
+\begin{align*}
+\frac{\partial \mathcal{L}}{\partial \mathbf{Z}} &= \frac{1}{m}(\hat{\mathbf{Y}} - \mathbf{Y})
+\end{align*}
+$$
 
 ### Backpropagation
 
-For a dense layer with input \(\mathbf{X}\) and upstream gradient \(\frac{\partial \mathcal{L}}{\partial \mathbf{Z}}\):
+For a dense layer with input $\mathbf{X}$ and upstream gradient $\frac{\partial \mathcal{L}}{\partial \mathbf{Z}}$:
 
-\[
-\frac{\partial \mathcal{L}}{\partial \mathbf{W}} = \frac{1}{m} \mathbf{X}^\top \frac{\partial \mathcal{L}}{\partial \mathbf{Z}}
-\]
+$$
+\begin{align*}
+\frac{\partial \mathcal{L}}{\partial \mathbf{W}} &= \frac{1}{m} \mathbf{X}^\top \frac{\partial \mathcal{L}}{\partial \mathbf{Z}}
+\end{align*}
+$$
 
-\[
-\frac{\partial \mathcal{L}}{\partial \mathbf{b}} = \frac{1}{m} \sum_{i=1}^{m} \frac{\partial \mathcal{L}}{\partial \mathbf{Z}_i}
-\]
+$$
+\begin{align*}
+\frac{\partial \mathcal{L}}{\partial \mathbf{b}} &= \frac{1}{m} \sum_{i=1}^{m} \frac{\partial \mathcal{L}}{\partial \mathbf{Z}_i}
+\end{align*}
+$$
 
-\[
-\frac{\partial \mathcal{L}}{\partial \mathbf{X}} = \frac{\partial \mathcal{L}}{\partial \mathbf{Z}} \mathbf{W}^\top
-\]
+$$
+\begin{align*}
+\frac{\partial \mathcal{L}}{\partial \mathbf{X}} &= \frac{\partial \mathcal{L}}{\partial \mathbf{Z}} \mathbf{W}^\top
+\end{align*}
+$$
 
 **ReLU Backward:**
 
-\[
-\frac{\partial \mathcal{L}}{\partial \mathbf{Z}} = \frac{\partial \mathcal{L}}{\partial \mathbf{A}} \odot \mathbf{1}_{[\mathbf{Z} > 0]}
-\]
+$$
+\begin{align*}
+\frac{\partial \mathcal{L}}{\partial \mathbf{Z}} &= \frac{\partial \mathcal{L}}{\partial \mathbf{A}} \odot \mathbf{1}_{[\mathbf{Z} > 0]}
+\end{align*}
+$$
 
 ---
 
@@ -127,15 +153,17 @@ Input (2) → Dense (32) → ReLU → Dense (3) → Softmax → Output
 ```
 
 **Training:**
-- Optimizer: SGD with learning rate \(\eta = 0.1\)
+- Optimizer: SGD with learning rate $\eta = 0.1$
 - Mini-batch size: 64
 - Epochs: 200
 
 **Weight Update:**
 
-\[
-\mathbf{W} \leftarrow \mathbf{W} - \eta \frac{\partial \mathcal{L}}{\partial \mathbf{W}}
-\]
+$$
+\begin{align*}
+\mathbf{W} &\leftarrow \mathbf{W} - \eta \frac{\partial \mathcal{L}}{\partial \mathbf{W}}
+\end{align*}
+$$
 
 ---
 
@@ -143,11 +171,11 @@ Input (2) → Dense (32) → ReLU → Dense (3) → Softmax → Output
 
 | Metric | Formula |
 |--------|---------|
-| **Accuracy** | \(\frac{1}{m}\sum_{i=1}^{m} \mathbf{1}[\hat{y}_i = y_i]\) |
-| **Precision** | \(\frac{TP}{TP + FP}\) |
-| **Recall** | \(\frac{TP}{TP + FN}\) |
-| **F1 Score** | \(\frac{2 \cdot P \cdot R}{P + R}\) |
-| **ECE** | \(\sum_{b=1}^{B} \frac{n_b}{m} \|\text{acc}(b) - \text{conf}(b)\|\) |
+| **Accuracy** | $\frac{1}{m}\sum_{i=1}^{m} \mathbf{1}[\hat{y}_i = y_i]$ |
+| **Precision** | $\frac{TP}{TP + FP}$ |
+| **Recall** | $\frac{TP}{TP + FN}$ |
+| **F1 Score** | $\frac{2 \cdot P \cdot R}{P + R}$ |
+| **ECE** | $\sum_{b=1}^{B} \frac{n_b}{m} \|\text{acc}(b) - \text{conf}(b)\|$ |
 
 **Final Results:**
 - Accuracy: 97.3%
