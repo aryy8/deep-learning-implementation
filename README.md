@@ -1,192 +1,140 @@
-# Neural Network from Scratch
+# Deep Learning Implementations
 
-A pure NumPy implementation of a feedforward neural network, demonstrating core deep learning concepts from first principles.
+Comprehensive notes and runnable implementation for three neural network builds:
+- A NumPy-first network built from primitives.
+- A Keras MLP for customer churn prediction.
+- A Keras CNN for CIFAR-10 image classification.
 
-## Table of Contents
-
-- [Overview](#overview)
-- [Mathematical Foundations](#mathematical-foundations)
-  - [Single Neuron](#single-neuron)
-  - [Dense Layer](#dense-layer)
-  - [Activation Functions](#activation-functions)
-  - [Loss Functions](#loss-functions)
-  - [Backpropagation](#backpropagation)
-- [Network Architecture](#network-architecture)
-- [Evaluation Metrics](#evaluation-metrics)
+## Index
+1. [NumPy Feedforward Network (`neuralnetwork.ipynb`)](#1-numpy-feedforward-network-neuralnetworkipynb)
+2. [Keras ANN for Churn (`artificialnn.ipynb`)](#2-keras-ann-for-churn-artificialnnipynb)
+3. [Keras CNN for CIFAR-10 (`cnn.ipynb`)](#3-keras-cnn-for-cifar-10-cnnipynb)
+4. [Repository Layout](#repository-layout)
+5. [Setup and Running](#setup-and-running)
 
 ---
 
-## Overview
+## 1) NumPy Feedforward Network (`neuralnetwork.ipynb`)
+Purpose: implement a neural network from first principles (no deep learning framework).
 
-This notebook builds a 2-layer neural network step-by-step:
-1. Single neuron → Dense layer → Stacked layers
-2. Forward propagation → Backward propagation → Training loop
-3. MSE regression → Softmax classification
+Key components:
+- Layers: manual Dense, ReLU, Softmax with cached tensors for backprop.
+- Losses/metrics: MSE for regression; cross-entropy + softmax for classification; accuracy, confusion matrix, per-class precision/recall/F1, macro/weighted F1, top-2 accuracy, log loss, confidence, and expected calibration error (ECE).
+- Training: minibatch SGD.
 
----
+Architectures:
 
-## Mathematical Foundations
-
-### Single Neuron
-
-A single neuron computes a weighted sum of inputs plus a bias:
-
-$$
-\begin{align*}
-z &= \sum_{i=1}^{n} w_i x_i + b = \mathbf{w}^\top \mathbf{x} + b
-\end{align*}
-$$
-
-Where:
-- $\mathbf{x} \in \mathbb{R}^n$ — input vector
-- $\mathbf{w} \in \mathbb{R}^n$ — weight vector
-- $b \in \mathbb{R}$ — bias term
-
-### Dense Layer
-
-For a batch of $m$ samples with $n$ inputs and $k$ neurons:
-
-$$
-\begin{align*}
-\mathbf{Z} &= \mathbf{X}\mathbf{W} + \mathbf{b}
-\end{align*}
-$$
-
-Where:
-- $\mathbf{X} \in \mathbb{R}^{m \times n}$ — input matrix
-- $\mathbf{W} \in \mathbb{R}^{n \times k}$ — weight matrix
-- $\mathbf{b} \in \mathbb{R}^{1 \times k}$ — bias vector (broadcast)
-- $\mathbf{Z} \in \mathbb{R}^{m \times k}$ — output (pre-activation)
-
-### Activation Functions
-
-**ReLU (Rectified Linear Unit):**
-
-$$
-\begin{align*}
-\text{ReLU}(z) &= \max(0, z)
-\end{align*}
-$$
-
-$$
-\begin{align*}
-\frac{\partial \text{ReLU}}{\partial z} &= \begin{cases} 1 & z > 0 \\ 0 & z \leq 0 \end{cases}
-\end{align*}
-$$
-
-**Softmax (for classification):**
-
-$$
-\begin{align*}
-\text{softmax}(z_i) &= \frac{e^{z_i}}{\sum_{j=1}^{K} e^{z_j}}
-\end{align*}
-$$
-
-### Loss Functions
-
-**Mean Squared Error (MSE):**
-
-$$
-\begin{align*}
-\mathcal{L}_{\text{MSE}} &= \frac{1}{m} \sum_{i=1}^{m} (\hat{y}_i - y_i)^2
-\end{align*}
-$$
-
-$$
-\begin{align*}
-\frac{\partial \mathcal{L}}{\partial \hat{y}} &= \frac{2}{m}(\hat{y} - y)
-\end{align*}
-$$
-
-**Cross-Entropy Loss:**
-
-$$
-\begin{align*}
-\mathcal{L}_{\text{CE}} &= -\frac{1}{m} \sum_{i=1}^{m} \sum_{k=1}^{K} y_{ik} \log(\hat{y}_{ik})
-\end{align*}
-$$
-
-**Softmax + Cross-Entropy Gradient (combined):**
-
-$$
-\begin{align*}
-\frac{\partial \mathcal{L}}{\partial \mathbf{Z}} &= \frac{1}{m}(\hat{\mathbf{Y}} - \mathbf{Y})
-\end{align*}
-$$
-
-### Backpropagation
-
-For a dense layer with input $\mathbf{X}$ and upstream gradient $\frac{\partial \mathcal{L}}{\partial \mathbf{Z}}$:
-
-$$
-\begin{align*}
-\frac{\partial \mathcal{L}}{\partial \mathbf{W}} &= \frac{1}{m} \mathbf{X}^\top \frac{\partial \mathcal{L}}{\partial \mathbf{Z}}
-\end{align*}
-$$
-
-$$
-\begin{align*}
-\frac{\partial \mathcal{L}}{\partial \mathbf{b}} &= \frac{1}{m} \sum_{i=1}^{m} \frac{\partial \mathcal{L}}{\partial \mathbf{Z}_i}
-\end{align*}
-$$
-
-$$
-\begin{align*}
-\frac{\partial \mathcal{L}}{\partial \mathbf{X}} &= \frac{\partial \mathcal{L}}{\partial \mathbf{Z}} \mathbf{W}^\top
-\end{align*}
-$$
-
-**ReLU Backward:**
-
-$$
-\begin{align*}
-\frac{\partial \mathcal{L}}{\partial \mathbf{Z}} &= \frac{\partial \mathcal{L}}{\partial \mathbf{A}} \odot \mathbf{1}_{[\mathbf{Z} > 0]}
-\end{align*}
-$$
-
----
-
-## Network Architecture
-
+**1. Regression Model Architecture:**
 ```
-Input (2) → Dense (32) → ReLU → Dense (3) → Softmax → Output
+Input(2) -> Dense(16) -> ReLU -> Dense(1)
 ```
 
-**Training:**
-- Optimizer: SGD with learning rate $\eta = 0.1$
-- Mini-batch size: 64
-- Epochs: 200
+**2. Classification Model Architecture:**
+```
+Input(2) -> Dense(32) -> ReLU -> Dense(3) -> Softmax
+```
+_These diagrams illustrate the sequential layers and their connections within the respective models._
 
-**Weight Update:**
+Workflow (classification example):
+1) Generate 3-class 2D blobs (`make_blobs`).
+2) One-hot encode labels; split into train/val.
+3) Forward pass: Dense -> ReLU -> Dense -> Softmax.
+4) Compute cross-entropy loss.
+5) Backprop manually (dZ2, dW/db, dZ1, etc.).
+6) Update weights with SGD.
+7) Validate and report metrics every few epochs (val accuracy ~97%).
 
-$$
-\begin{align*}
-\mathbf{W} &\leftarrow \mathbf{W} - \eta \frac{\partial \mathcal{L}}{\partial \mathbf{W}}
-\end{align*}
-$$
+What is demonstrated:
+- From-scratch forward/backward math.
+- Minibatch training loop structure.
+- Rich evaluation including calibration (ECE) and top-k.
 
 ---
 
-## Evaluation Metrics
+## 2) Keras ANN for Churn (`artificialnn.ipynb`)
+Purpose: predict churn (binary classification) on `Churn_Modelling.csv` with an MLP.
 
-| Metric | Formula |
-|--------|---------|
-| **Accuracy** | $\frac{1}{m}\sum_{i=1}^{m} \mathbf{1}[\hat{y}_i = y_i]$ |
-| **Precision** | $\frac{TP}{TP + FP}$ |
-| **Recall** | $\frac{TP}{TP + FN}$ |
-| **F1 Score** | $\frac{2 \cdot P \cdot R}{P + R}$ |
-| **ECE** | $\sum_{b=1}^{B} \frac{n_b}{m} \|\text{acc}(b) - \text{conf}(b)\|$ |
+Data prep:
+- Select features columns 3–12; label column 13.
+- One-hot encode `Geography` and `Gender` (drop_first=True).
+- Scale features with `StandardScaler`.
+- Train/test split (80/20).
 
-**Final Results:**
-- Accuracy: 97.3%
-- Macro F1: 0.973
-- Top-2 Accuracy: 100%
+Model Architecture:
+```
+Input (~10 features after encoding)
+  -> Dense(8, ReLU)
+  -> Dense(6, ReLU)
+  -> Dense(4, ReLU)
+  -> Dense(1, Sigmoid)
+```
+**Loss Function:** `binary_crossentropy`
+**Optimizer:** `Adam`
+**Callbacks:** `EarlyStopping` on `val_loss`
+
+_This diagram shows the sequential flow of data through the layers of the Artificial Neural Network._
+
+Training/evaluation:
+- Fit with validation split and early stopping.
+- Predict on test set, threshold at 0.5.
+- Report confusion matrix and accuracy.
 
 ---
 
-## Requirements
+## 3) Keras CNN for CIFAR-10 (`cnn.ipynb`)
+Purpose: classify CIFAR-10 images with a small ConvNet.
 
+Data prep:
+- Load CIFAR-10 via `tf.keras.datasets.cifar10`.
+- Normalize pixel values to [0, 1].
+- Visualize sample images.
+
+Model Architecture:
 ```
-numpy
+Input (32x32x3)
+  -> Conv2D(32, 3x3, ReLU)
+  -> MaxPool(2x2)
+  -> Conv2D(64, 3x3, ReLU)
+  -> MaxPool(2x2)
+  -> Conv2D(64, 3x3, ReLU)
+  -> Flatten
+  -> Dense(64, ReLU)
+  -> Dense(10, logits)
 ```
-# deep-learning-implementation
+**Loss Function:** `SparseCategoricalCrossentropy(from_logits=True)`
+**Optimizer:** `Adam`
+
+_This diagram outlines the layers of the Convolutional Neural Network used for image classification._
+
+Training/evaluation:
+- Train for 10 epochs with validation on the test set.
+- Plot train vs. validation accuracy.
+- Test accuracy around 0.69 in the provided run.
+
+---
+
+## Repository Layout
+- `neuralnetwork.ipynb` — NumPy-first principles network with full training loop and metrics.
+- `artificialnn.ipynb` — Churn prediction MLP with preprocessing and early stopping.
+- `cnn.ipynb` — CIFAR-10 ConvNet example.
+- `Churn_Modelling.csv` — dataset for the churn notebook.
+
+---
+
+## Setup and Running
+1) Install dependencies (Python 3.10+ recommended):
+```
+pip install numpy pandas scikit-learn matplotlib tensorflow
+```
+2) Launch notebooks (Jupyter example):
+```
+jupyter notebook
+```
+3) Open a notebook and run top-to-bottom:
+   - `neuralnetwork.ipynb`: runs entirely in NumPy; no external data required.
+   - `artificialnn.ipynb`: ensure `Churn_Modelling.csv` is in the repo root.
+   - `cnn.ipynb`: CIFAR-10 downloads automatically on first run.
+
+Notes:
+- GPU is optional but speeds up the Keras notebooks.
+- Each notebook is self-contained; no extra Python modules beyond the listed deps.
